@@ -1,6 +1,7 @@
 // ESM
 import Fastify from 'fastify';
-import routes from './src/routes/index.js';
+import cors from '@fastify/cors';
+import { routes as emailRoutes } from './src/routes/emails.js';
 
 /**
  * @type {import('fastify').FastifyInstance} Instance of Fastify
@@ -9,12 +10,21 @@ const fastify = Fastify({
   logger: true
 });
 
-fastify.register(routes);
+// Register CORS
+fastify.register(cors, {
+  origin: 'http://localhost:3000',
+  methods: ['GET', 'POST', 'PUT', 'DELETE'],
+});
 
-fastify.listen({ port: process.env.PORT }, function (err, address) {
-  if (err) {
-    fastify.log.error(err)
-    process.exit(1)
+fastify.register(emailRoutes);
+
+const start = async () => {
+  try {
+    await fastify.listen({ port: 3001 });
+  } catch (err) {
+    fastify.log.error(err);
+    process.exit(1);
   }
-  // Server is now listening on ${address}
-})
+};
+
+start();
